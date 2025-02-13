@@ -52,13 +52,12 @@ let inApiCall = false;
 // Function to roll dice
 function rollDice(diceSizes) {
     const results = [];
-
     for (const numSides of diceSizes) {
-        // Roll a single die with `numSides` sides
-        const roll = Math.floor(Math.random() * numSides) + 1;
-        results.push({ sides: numSides, roll: roll });
+        results.push({
+            sides: numSides,
+            roll: Math.floor(Math.random() * numSides) + 1
+        });
     }
-
     return results;
 }
 
@@ -141,61 +140,82 @@ async function apocalypseWorldDiceRoller() {
         }
     ];
 
-    // Ask the user which move to use
-    toastr.info("Choose a basic move:");
+    // Send move list to UI
+    let moveList = "Choose a basic move:\n";
     basicMoves.forEach((move, index) => {
-        toastr.info(`${index + 1}. ${move.name} ${move.stat}`);
-    }); 
+        moveList += `${index + 1}. ${move.name} ${move.stat}\n`;
+    });
+    await sendMessageToUI(moveList.trim());
 
-    // Simulate user input (for simplicity, we'll use a hardcoded choice)
-    const choice = parseInt(prompt("Enter the number of the move you want to use:")) - 1;
+    // Wait for user input
+    const userChoice = await waitForUserInput();
+    const choice = parseInt(userChoice) - 1;
 
-    if (choice < 0 || choice >= basicMoves.length || isNaN(choice)) {
-        toastr.info("Invalid choice. Please try again.");
+    // Validate input
+    if (isNaN(choice) || choice < 0 || choice >= basicMoves.length) {
+        await sendMessageToUI("Invalid choice. Please try again.");
         return;
     }
 
     const selectedMove = basicMoves[choice];
-
-    // Display the selected move's description
-    toastr.info(`\nYou selected: ${selectedMove.name} ${selectedMove.stat}`);
-    toastr.info(selectedMove.description);
+    
+    // Send move details to UI
+    let moveDetails = `You selected: ${selectedMove.name} ${selectedMove.stat}\n`;
+    moveDetails += selectedMove.description + "\n";
 
     if (selectedMove.holds) {
-        toastr.info("\nHolds:");
-        selectedMove.holds.forEach(hold => toastr.info(`- ${hold}`));
+        moveDetails += "\nHolds:\n" + selectedMove.holds.join("\n");
     }
-
+    
     if (selectedMove.questions) {
-        toastr.info("\nQuestions:");
-        selectedMove.questions.forEach(question => toastr.info(`- ${question}`));
+        moveDetails += "\nQuestions:\n" + selectedMove.questions.join("\n");
     }
 
-    // Roll 2d6 using the rollDice() function
-    const diceRolls = rollDice([6, 6]); // Roll two six-sided dice
+    await sendMessageToUI(moveDetails);
+
+    // Roll dice and show results
+    const diceRolls = rollDice([6, 6]);
     const total = diceRolls[0].roll + diceRolls[1].roll;
+    
+    let rollResult = `Rolling 2d6...\n`;
+    rollResult += `Dice 1: ${diceRolls[0].roll}\n`;
+    rollResult += `Dice 2: ${diceRolls[1].roll}\n`;
+    rollResult += `Total: ${total}\n\n`;
 
-    toastr.info(`\nRolling 2d6... You rolled a ${diceRolls[0].roll} and a ${diceRolls[1].roll} (Total: ${total}).`);
-
-    // Determine the result
     if (total >= 10) {
-        toastr.info("\nSuccess!");
-        toastr.info(selectedMove.success);
+        rollResult += "Success!\n" + selectedMove.success;
         if (selectedMove.questions) {
-            toastr.info("You may ask a follow-up question.");
+            rollResult += "\nYou may ask a follow-up question.";
         }
     } else if (total >= 7) {
-        toastr.info("\nPartial Success!");
+        rollResult += "Partial Success!\n";
         if (Array.isArray(selectedMove.partialSuccess)) {
-            toastr.info("Choose one:");
-            selectedMove.partialSuccess.forEach((option, index) => toastr.info(`${index + 1}. ${option}`));
+            rollResult += "Choose one:\n" + 
+                selectedMove.partialSuccess.map((o, i) => `${i+1}. ${o}`).join("\n");
         } else {
-            toastr.info(selectedMove.partialSuccess);
+            rollResult += selectedMove.partialSuccess;
         }
     } else {
-        toastr.info("\nFail!");
-        toastr.info(selectedMove.fail);
+        rollResult += "Fail!\n" + selectedMove.fail;
     }
+
+    await sendMessageToUI(rollResult);
+}
+
+// Helper function to wait for user input
+async function waitForUserInput() {
+    return new Promise(resolve => {
+        const context = getContext();
+        const originalLength = context.chat.length;
+        
+        const checkInterval = setInterval(() => {
+            if (context.chat.length > originalLength) {
+                clearInterval(checkInterval);
+                const lastMessage = context.chat[context.chat.length - 1];
+                resolve(lastMessage.mes.trim());
+            }
+        }, 100);
+    });
 }
 
 /**
@@ -247,7 +267,7 @@ async function requestDiceMaestroResponses() {
     const context = getContext();
     const chat = context.chat;
 
-    // no characters or group selected
+    // no action specified
     if (!context.groupId && context.characterId === undefined) {
         return;
     }
@@ -439,10 +459,14 @@ jQuery(async () => {
     SlashCommandParser.addCommandObject(SlashCommand.fromProps({
         name: 'DiceMaestro',
         callback: async () => {
-            await requestDiceMaestroResponses();
+            await beginDiceMaestro();
             return '';
         },
         helpString: 'Triggers DiceMaestro Roller Interface.',
+        SlashCommandArgument.fromProps({ description: 'action user is taking',
+            typeList: ARGUMENT_TYPE.STRING
+            isRequired: false,
+        })
     }));
 
     MacrosParser.registerMacro('suggestionNumber', () => `${extension_settings.DiceMaestro_responses?.num_responses || defaultSettings.num_responses}`);
