@@ -41,11 +41,179 @@ Do not include any other content in your response.`,
 };
 let inApiCall = false;
 
+/*  Simple Dice Roller:
+ * const diceSizes = [6, 20, 10]; // Roll one 6-sided die, one 20-sided die, and one 10-sided die
+ * const rolledDice = rollDice(diceSizes);
+ * console.log(rolledDice);
+ */
+function rollDice(diceSizes) {
+    const results = [];
+
+    for (const numSides of diceSizes) {
+        // Roll a single die with `numSides` sides
+        const roll = Math.floor(Math.random() * numSides) + 1;
+        results.push({ sides: numSides, roll: roll });
+    }
+
+    return results;
+}
+
+// Function to roll dice
+function rollDice(diceSizes) {
+    const results = [];
+
+    for (const numSides of diceSizes) {
+        // Roll a single die with `numSides` sides
+        const roll = Math.floor(Math.random() * numSides) + 1;
+        results.push({ sides: numSides, roll: roll });
+    }
+
+    return results;
+}
+
+// Apocalypse World Style Dice Roller
+// I should think about making these customizable..
+async function apocalypseWorldDiceRoller() {
+    // List of basic moves with their stats and descriptions
+    const basicMoves = [
+        {
+            name: "ACT UNDER PRESSURE",
+            stat: "+cool",
+            description: "Protagonist acts under serious pressure, requiring unusual discipline, resolve, endurance, or care.",
+            success: "{{user}} does it, without problem.",
+            partialSuccess: "<<worse outcome, hard bargain, or ugly choice>>",
+            fail: "{{user}} fails the action."
+        },
+/*         {
+            name: "ASSESS",
+            stat: "+edge",
+            description: "Protagonist is carefully checking the situation out, studying and analyzing to gather information.",
+            holds: [
+                "What potential complication do I need to be wary of?",
+                "What do I notice despite an effort to conceal it?",
+                "How is ______ vulnerable to me?",
+                "How can I avoid trouble or hide here?",
+                "What is my best way in/way out/way past?",
+                "Where can I gain the most advantage?",
+                "Who or what is my biggest threat in this situation?",
+                "Who or what is in control here?"
+            ]
+        }, */
+        {
+            name: "GO AGGRO",
+            stat: "+edge",
+            description: "Protagonist uses the threat of violence to control the antagonist’s behavior and intends to carry through.",
+            success: "Antagonist does what {{user}} wants.",
+            partialSuccess: [
+                "They attempt to remove you as a threat, but not before suffering the established consequences.",
+                "They do it, but they want payback. Add them as a Threat.",
+                "They do it, but tell someone all about it." //????
+            ],
+            fail: "{{user}} fails the action."
+        },
+        {
+            name: "MIX IT UP",
+            stat: "+meat",
+            description: "Protagonist uses violence to gain the upper hand or seize control of his objective.",
+            success: "{{user}} does it, without problem.",
+            partialSuccess: [
+                "You make too much noise. Advance the relevant Mission Clock.",
+                "You take harm as established by the fiction.",
+                "An ally takes harm as established by the fiction.",
+                "Something of value breaks."
+            ],
+            fail: "{{user}} fails the action."
+        },
+        {
+            name: "RESEARCH",
+            stat: "+mind",
+            description: "Protagonist is investigating his target, with a library, a dossier, or a database.",
+            success: "Take [intel]; the MC will answer your question and answer a follow-up question from this list as well:",
+            questions: [
+                "Where would I find ______?",
+                "How secure is ______?",
+                "Who or what is related to ______?",
+                "Who owned or employed ______?",
+                "Who or what is ______ most valuable to?",
+                "What is the relationship between ______ and ______?"
+            ],
+            partialSuccess: "Take [intel]; the MC will answer your question.",
+            fail: "The MC will answer your question... and make a move."
+        },
+        {
+            name: "FAST TALK",
+            stat: "+style",
+            description: "Protagonist tries to convince someone to do what they want, using bluffs, lies, or bluster.",
+            success: "NPCs do what {{user}} wants.",
+            partialSuccess: "NPCs do it, but someone will find out.",
+            fail: "{{user}} fails to convince them."
+        }
+    ];
+
+    // Ask the user which move to use
+    console.log("Choose a basic move:");
+    basicMoves.forEach((move, index) => {
+        console.log(`${index + 1}. ${move.name} ${move.stat}`);
+    }); 
+
+    // Simulate user input (for simplicity, we'll use a hardcoded choice)
+    const choice = parseInt(prompt("Enter the number of the move you want to use:")) - 1;
+
+    if (choice < 0 || choice >= basicMoves.length || isNaN(choice)) {
+        console.log("Invalid choice. Please try again.");
+        return;
+    }
+
+    const selectedMove = basicMoves[choice];
+
+    // Display the selected move's description
+    console.log(`\nYou selected: ${selectedMove.name} ${selectedMove.stat}`);
+    console.log(selectedMove.description);
+
+    if (selectedMove.holds) {
+        console.log("\nHolds:");
+        selectedMove.holds.forEach(hold => console.log(`- ${hold}`));
+    }
+
+    if (selectedMove.questions) {
+        console.log("\nQuestions:");
+        selectedMove.questions.forEach(question => console.log(`- ${question}`));
+    }
+
+    // Roll 2d6 using the rollDice() function
+    const diceRolls = rollDice([6, 6]); // Roll two six-sided dice
+    const total = diceRolls[0].roll + diceRolls[1].roll;
+
+    console.log(`\nRolling 2d6... You rolled a ${diceRolls[0].roll} and a ${diceRolls[1].roll} (Total: ${total}).`);
+
+    // Determine the result
+    if (total >= 10) {
+        console.log("\nSuccess!");
+        console.log(selectedMove.success);
+        if (selectedMove.questions) {
+            console.log("You may ask a follow-up question.");
+        }
+    } else if (total >= 7) {
+        console.log("\nPartial Success!");
+        if (Array.isArray(selectedMove.partialSuccess)) {
+            console.log("Choose one:");
+            selectedMove.partialSuccess.forEach((option, index) => console.log(`${index + 1}. ${option}`));
+        } else {
+            console.log(selectedMove.partialSuccess);
+        }
+    } else {
+        console.log("\nFail!");
+        console.log(selectedMove.fail);
+    }
+}
+
 /**
  * Parses the DiceMaestro response and returns the suggestions buttons
  * @param {string} response
  * @returns {string} text
  */
+
+// NEED TO CHANGE THIS TO VARIOUS DIE RESULT OPTIONS
 function parseResponse(response) {
     const suggestions = [];
     const regex = /<suggestion>(.+?)<\/suggestion>|Suggestion\s+\d+\s*:\s*(.+)|Suggestion_\d+\s*:\s*(.+)|^\d+\.\s*(.+)/gim;
@@ -144,7 +312,7 @@ function removeLastDiceMaestroMessage(chat = getContext().chat) {
 }
 
 /**
- * Sends the parsed DiceMaestro response to the SillyTavern UI
+ * Sends the list of moves from DiceMaestro to the SillyTavern UI
  * @param {string} parsedResponse
  */
 async function sendMessageToUI(parsedResponse) {
@@ -152,20 +320,12 @@ async function sendMessageToUI(parsedResponse) {
     const chat = context.chat;
 
     const messageObject = {
-        name: "DiceMaestro Suggestions",
-        is_user: true,
-        is_system: false,
-        send_date: getMessageTimeStamp(),
-        mes: `${parsedResponse}`,
-        mesId: context.chat.length,
-        extra: {
-            api: 'manual',
-            model: 'DiceMaestro',
-        }
+        name: basicMoves.name,
+        stat: basicMoves.stat,
+        description: basicMoves.description
     };
 
     context.chat.push(messageObject);
-    // await eventSource.emit(event_types.MESSAGE_SENT, (chat.length - 1));
     context.addOneMessage(messageObject, { showSwipes: false, forceId: chat.length - 1 });
 }
 
@@ -291,7 +451,7 @@ jQuery(async () => {
             await requestDiceMaestroResponses();
             return '';
         },
-        helpString: 'Triggers DiceMaestro responses generation.',
+        helpString: 'Triggers DiceMaestro Roller Interface.',
     }));
 
     MacrosParser.registerMacro('suggestionNumber', () => `${extension_settings.DiceMaestro_responses?.num_responses || defaultSettings.num_responses}`);

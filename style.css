@@ -8,7 +8,7 @@
 }
 
 .mes_text .custom-suggestions:before {
-    content: "What move are you making?";
+    content: "What result are you taking?";
     font-weight: bold;
     display: block;
     text-align: center;

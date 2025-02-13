@@ -1,9 +1,7 @@
 # SillyTavern DiceMaestro Responses Extension
 This extension adds Choose Your Own Adventure (DiceMaestro) style responses to your SillyTavern chats. It generates multiple response options for the user to choose from, enhancing interactivity and allowing for branching narratives.
 
-<p align="center">
-  <img src="assets/response.png" width="50%">
-</p>
+
 
 ## Features
 - Generates multiple response options for user selection
@@ -27,9 +25,6 @@ After generating DiceMaestro options, you'll see a set of buttons for each sugge
 - **Edit Button**: Next to each suggestion is an edit button (pencil icon). Clicking this will copy the suggestion text to the input area, allowing you to modify it before sending or use it as inspiration for your own response.
 
 ### Settings
-<p align="center">
-    <img src="assets/settings.png" width="50%">
-</p>
 
 - **LLM Prompt for Options**: Customize the prompt used to generate DiceMaestro response options. You can use `{{suggestionNumber}}` as a placeholder for the number of responses.
 - You must ensure the LLM response contains each suggestion between `<suggestion></suggestion>` tags. The plugin also support `< suggestion >` and `Suggestion N: text...` as valid tags.
