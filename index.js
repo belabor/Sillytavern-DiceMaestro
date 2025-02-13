@@ -142,10 +142,13 @@ async function apocalypseWorldDiceRoller() {
 
     // Send move list to UI
     let moveList = "Choose a basic move:\n";
-    basicMoves.forEach((move, index) => {
-        moveList += `${index + 1}. ${move.name} ${move.stat}\n`;
-    });
-    await sendMessageToUI(moveList.trim());
+    const Moves = basicMoves.forEach((move, index) => {
+            moveList += `${index + 1}. <div class="move"><button class="move">${move.name}</button><span class="text"> ${move.stat}</span></button></div>`;
+        }
+        newMoves = `<div class=\"moves\">${Moves.join("")}</div>`
+    );
+        
+    await sendMessageToUI(newMoves);
 
     // Wait for user input
     const userChoice = await waitForUserInput();
@@ -160,18 +163,18 @@ async function apocalypseWorldDiceRoller() {
     const selectedMove = basicMoves[choice];
     
     // Send move details to UI
-    let moveDetails = `You selected: ${selectedMove.name} ${selectedMove.stat}\n`;
-    moveDetails += selectedMove.description + "\n";
+    let falloutDetails = `You selected: ${selectedMove.name} ${selectedMove.stat}\n`;
+    falloutDetails += selectedMove.description + "\n";
 
     if (selectedMove.holds) {
-        moveDetails += "\nHolds:\n" + selectedMove.holds.join("\n");
+        falloutDetails += "\nHolds:\n" + selectedMove.holds.join("\n");
     }
     
     if (selectedMove.questions) {
-        moveDetails += "\nQuestions:\n" + selectedMove.questions.join("\n");
+        falloutDetails += "\nQuestions:\n" + selectedMove.questions.join("\n");
     }
 
-    await sendMessageToUI(moveDetails);
+    toastr.info(falloutDetails);
 
     // Roll dice and show results
     const diceRolls = rollDice([6, 6]);
@@ -199,7 +202,7 @@ async function apocalypseWorldDiceRoller() {
         rollResult += "Fail!\n" + selectedMove.fail;
     }
 
-    await sendMessageToUI(rollResult);
+    toastr.info(rollResult);
 }
 
 // Helper function to wait for user input
@@ -219,31 +222,22 @@ async function waitForUserInput() {
 }
 
 /**
- * Parses the DiceMaestro response and returns the suggestions buttons
+ * Parses the DiceMaestro response and returns the fallout buttons
  * @param {string} response
  * @returns {string} text
  */
 
-// NEED TO CHANGE THIS TO VARIOUS DIE RESULT OPTIONS
-function parseResponse(response) {
-    const suggestions = [];
-    const regex = /<suggestion>(.+?)<\/suggestion>|Suggestion\s+\d+\s*:\s*(.+)|Suggestion_\d+\s*:\s*(.+)|^\d+\.\s*(.+)/gim;
-    let match;
-
-    while ((match = regex.exec(`${response}\n`)) !== null) {
-        const suggestion = match[1] || match[2] || match[3] || match[4];
-        if (suggestion && suggestion.trim()) {
-            suggestions.push(suggestion.trim());
-        }
-    }
-
-    if (suggestions.length === 0) {
+// NEED TO CHANGE THIS TO VARIOUS MOVES OPTIONS
+function parseMoves(response) {
+    const moves = [];
+ 
+    if (moves.length === 0) {
         return;
     }
 
-    const newResponse = suggestions.map((suggestion) =>
-`<div class="suggestion"><button class="suggestion">${suggestion}</button><button class="edit-suggestion fa-solid fa-pen-to-square"><span class="text">${suggestion}</span></button></div>`);
-    return `<div class=\"suggestions\">${newResponse.join("")}</div>`
+    const newMoves = moves.map((suggestion) =>
+`<div class="move"><button class="move">${move}</button><span class="text">${move}</span></button></div>`);
+    return `<div class=\"move\">${newMoves.join("")}</div>`
 }
 
 async function waitForGeneration() {
@@ -260,10 +254,10 @@ async function waitForGeneration() {
     }
 }
 /**
- * Handles the DiceMaestro response generation
+ * Handles the DiceMaestro move fallout generation
  * @returns
  */
-async function requestDiceMaestroResponses() {
+async function requestDiceMaestroFallout() {
     const context = getContext();
     const chat = context.chat;
 
@@ -331,72 +325,12 @@ async function sendMessageToUI(parsedResponse) {
     const chat = context.chat;
 
     const messageObject = {
-        name: basicMoves.name,
-        stat: basicMoves.stat,
-        description: basicMoves.description
+        //Put options for moves here
     };
 
     context.chat.push(messageObject);
     context.addOneMessage(messageObject, { showSwipes: false, forceId: chat.length - 1 });
 }
-
-/**
- * Handles the DiceMaestro click event by doing impersonation
- * @param {*} event
- */
-async function handleDiceMaestroBtn(event) {
-    const $button = $(event.target);
-    const text = $button?.text()?.trim() || $button.find('.custom-text')?.text()?.trim();
-    if (text.length === 0) {
-        return;
-    }
-    await waitForGeneration();
-
-    removeLastDiceMaestroMessage();
-    // Sleep for 500ms before continuing
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    const inputTextarea = document.querySelector('#send_textarea');
-    if (!(inputTextarea instanceof HTMLTextAreaElement)) {
-        return;
-    }
-
-    let impersonatePrompt = extension_settings.DiceMaestro_responses?.llm_prompt_impersonate || '';
-    impersonatePrompt = substituteParamsExtended(String(extension_settings.DiceMaestro_responses?.llm_prompt_impersonate), { statsNumber: text });
-
-    const quiet_prompt = `/impersonate await=true ${impersonatePrompt}`;
-    inputTextarea.value = quiet_prompt;
-
-    if ($button.hasClass('custom-edit-suggestion')) {
-        return; // Stop here if it's the edit button
-    }
-
-    inputTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-
-    const sendButton = document.querySelector('#send_but');
-    if (sendButton instanceof HTMLElement) {
-        sendButton.click();
-    }
-}
-
-/**
- * Handles the DiceMaestro by sending the text to the User Input box
- * @param {*} event
- */
-// function handleDiceMaestroEditBtn(event) {
-//     const $button = $(event.target);
-//     const text = $button.find('.custom-text').text().trim();
-//     if (text.length === 0) {
-//         return;
-//     }
-
-//     removeLastDiceMaestroMessage();
-//     const inputTextarea = document.querySelector('#send_textarea');
-//     if (inputTextarea instanceof HTMLTextAreaElement) {
-//         inputTextarea.value = text;
-//     }
-// }
-
 
 /**
  * Settings Stuff
@@ -471,7 +405,5 @@ jQuery(async () => {
 
     MacrosParser.registerMacro('suggestionNumber', () => `${extension_settings.DiceMaestro_responses?.num_responses || defaultSettings.num_responses}`);
 
-    // Event delegation for DiceMaestro buttons
-    $(document).on('click', 'button.custom-edit-suggestion', handleDiceMaestroBtn);
-    $(document).on('click', 'button.custom-suggestion', handleDiceMaestroBtn);
+
 });
