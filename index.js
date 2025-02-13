@@ -380,7 +380,6 @@ jQuery(async () => {
         helpString: 'Triggers DiceMaestro Roller Interface.',
         description: `action user is taking`,
         typeList: ARGUMENT_TYPE.STRING,
-        enumList: [string],
         isRequired: false,
         callback: async () => {
             beginDiceMaestro();
