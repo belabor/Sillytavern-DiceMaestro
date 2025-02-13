@@ -141,14 +141,14 @@ async function apocalypseWorldDiceRoller() {
         }
     ];
 
-    // Send move list to UI
-    let moveList = `<div class="move">Choose a basic move:</div>`;
+    // Send move choice list to UI
+    let movesChoiceDisplay = `<div class="move">Choose a basic move:</div>`;
     basicMoves.forEach((move, index) => {
-            moveList += `${index + 1}. <div class="move"><button class="move">${move.name}</button><span class="text"> ${move.stat}</span></button></div>`;
+            movesChoiceDisplay += `${index + 1}. <div class="move"><button class="move">${move.name}</button><span class="text"> ${move.stat}</span></button></div>`;
         });
-    const newMoves = `<div class=\"moves\">${moveList.join("")}</div>`;
+        movesChoiceDisplay += `<div class=\"moves\">${movesChoiceDisplay.join("")}</div>`;
         
-    await sendMessageToUI(newMoves);
+    await sendMessageToUI(movesChoiceDisplay);
 
     // Wait for user input
     const userChoice = await waitForUserInput();
