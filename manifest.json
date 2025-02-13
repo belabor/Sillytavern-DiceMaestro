@@ -1,11 +1,11 @@
 {
     "display_name": "Dice Maestro",
-    "loading_order": 9,
+    "loading_order": 1,
     "requires": [],
     "optional": [],
     "js": "index.js",
     "css": "style.css",
     "author": "belabor",
     "version": "0.1",
-    "homePage": "yourUrlHere"
+    "homePage": "https://github.com/belabor/Sillytavern-DiceMaestro"
 }

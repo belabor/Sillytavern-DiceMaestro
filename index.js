@@ -20,7 +20,8 @@ const extensionName = "Sillytavern-DiceMaestro";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 const defaultSettings = {
     enabled: false,
-    llm_prompt: `Stop the roleplay now and provide a response for the next story beat on {{user}} perspective. Ensure the suggestion aligns with its corresponding description:
+       llm_prompt: `Just a test`,
+/*     llm_prompt: `Stop the roleplay now and provide a response for the next story beat on {{user}} perspective. Ensure the suggestion aligns with its corresponding description:
 1. Protagonist acts under serious pressure, requiring unusual discipline, resolve, endurance or care.
 2. Protagonist uses the threat of violence to control the antagonist behavior and intends to carry through.
 3. Protagonist uses violence to gain the upper hand or seize control of his objective.
@@ -32,7 +33,7 @@ Each suggestion surrounded by \`<suggestion>\` tags. E.g:
 <suggestion>suggestion_2</suggestion>
 ...
 
-Do not include any other content in your response.`,
+Do not include any other content in your response.`, */
     llm_prompt_impersonate: `[Event Direction for the next story beat on {{user}} perspective: \`{{statsNumber}}\`]
 [Based on the expected events, write the user response]`,
     apply_wi_an: true,
@@ -44,19 +45,9 @@ let inApiCall = false;
 /*  Simple Dice Roller:
  * const diceSizes = [6, 20, 10]; // Roll one 6-sided die, one 20-sided die, and one 10-sided die
  * const rolledDice = rollDice(diceSizes);
- * console.log(rolledDice);
+ * toastr.info(rolledDice);
  */
-function rollDice(diceSizes) {
-    const results = [];
 
-    for (const numSides of diceSizes) {
-        // Roll a single die with `numSides` sides
-        const roll = Math.floor(Math.random() * numSides) + 1;
-        results.push({ sides: numSides, roll: roll });
-    }
-
-    return results;
-}
 
 // Function to roll dice
 function rollDice(diceSizes) {
@@ -151,59 +142,59 @@ async function apocalypseWorldDiceRoller() {
     ];
 
     // Ask the user which move to use
-    console.log("Choose a basic move:");
+    toastr.info("Choose a basic move:");
     basicMoves.forEach((move, index) => {
-        console.log(`${index + 1}. ${move.name} ${move.stat}`);
+        toastr.info(`${index + 1}. ${move.name} ${move.stat}`);
     }); 
 
     // Simulate user input (for simplicity, we'll use a hardcoded choice)
     const choice = parseInt(prompt("Enter the number of the move you want to use:")) - 1;
 
     if (choice < 0 || choice >= basicMoves.length || isNaN(choice)) {
-        console.log("Invalid choice. Please try again.");
+        toastr.info("Invalid choice. Please try again.");
         return;
     }
 
     const selectedMove = basicMoves[choice];
 
     // Display the selected move's description
-    console.log(`\nYou selected: ${selectedMove.name} ${selectedMove.stat}`);
-    console.log(selectedMove.description);
+    toastr.info(`\nYou selected: ${selectedMove.name} ${selectedMove.stat}`);
+    toastr.info(selectedMove.description);
 
     if (selectedMove.holds) {
-        console.log("\nHolds:");
-        selectedMove.holds.forEach(hold => console.log(`- ${hold}`));
+        toastr.info("\nHolds:");
+        selectedMove.holds.forEach(hold => toastr.info(`- ${hold}`));
     }
 
     if (selectedMove.questions) {
-        console.log("\nQuestions:");
-        selectedMove.questions.forEach(question => console.log(`- ${question}`));
+        toastr.info("\nQuestions:");
+        selectedMove.questions.forEach(question => toastr.info(`- ${question}`));
     }
 
     // Roll 2d6 using the rollDice() function
     const diceRolls = rollDice([6, 6]); // Roll two six-sided dice
     const total = diceRolls[0].roll + diceRolls[1].roll;
 
-    console.log(`\nRolling 2d6... You rolled a ${diceRolls[0].roll} and a ${diceRolls[1].roll} (Total: ${total}).`);
+    toastr.info(`\nRolling 2d6... You rolled a ${diceRolls[0].roll} and a ${diceRolls[1].roll} (Total: ${total}).`);
 
     // Determine the result
     if (total >= 10) {
-        console.log("\nSuccess!");
-        console.log(selectedMove.success);
+        toastr.info("\nSuccess!");
+        toastr.info(selectedMove.success);
         if (selectedMove.questions) {
-            console.log("You may ask a follow-up question.");
+            toastr.info("You may ask a follow-up question.");
         }
     } else if (total >= 7) {
-        console.log("\nPartial Success!");
+        toastr.info("\nPartial Success!");
         if (Array.isArray(selectedMove.partialSuccess)) {
-            console.log("Choose one:");
-            selectedMove.partialSuccess.forEach((option, index) => console.log(`${index + 1}. ${option}`));
+            toastr.info("Choose one:");
+            selectedMove.partialSuccess.forEach((option, index) => toastr.info(`${index + 1}. ${option}`));
         } else {
-            console.log(selectedMove.partialSuccess);
+            toastr.info(selectedMove.partialSuccess);
         }
     } else {
-        console.log("\nFail!");
-        console.log(selectedMove.fail);
+        toastr.info("\nFail!");
+        toastr.info(selectedMove.fail);
     }
 }
 
