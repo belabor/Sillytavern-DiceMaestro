@@ -7,12 +7,13 @@ import { saveSettingsDebounced,
     setEditedMessageId,
     generateQuietPrompt,
     is_send_press,
-    substituteParamsExtended,
+ //   substituteParamsExtended,
  } from "../../../../script.js";
 
  import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
+ import { ARGUMENT_TYPE, SlashCommandArgument } from '../../../slash-commands/SlashCommandArgument.js';
  import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
- import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
+ // import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
  import { MacrosParser } from '../../../macros.js';
  import { is_group_generating, selected_group } from '../../../group-chats.js';
 
@@ -141,12 +142,11 @@ async function apocalypseWorldDiceRoller() {
     ];
 
     // Send move list to UI
-    let moveList = "Choose a basic move:\n";
+    let moveList = `<div class="move">Choose a basic move:</div>`;
     const Moves = basicMoves.forEach((move, index) => {
             moveList += `${index + 1}. <div class="move"><button class="move">${move.name}</button><span class="text"> ${move.stat}</span></button></div>`;
-        }
-        newMoves = `<div class=\"moves\">${Moves.join("")}</div>`
-    );
+        })
+    const newMoves = `<div class=\"moves\">${Moves.join("")}</div>`;
         
     await sendMessageToUI(newMoves);
 
@@ -156,7 +156,7 @@ async function apocalypseWorldDiceRoller() {
 
     // Validate input
     if (isNaN(choice) || choice < 0 || choice >= basicMoves.length) {
-        await sendMessageToUI("Invalid choice. Please try again.");
+        await toastr.error("Invalid choice, something broke");
         return;
     }
 
@@ -177,6 +177,7 @@ async function apocalypseWorldDiceRoller() {
     toastr.info(falloutDetails);
 
     // Roll dice and show results
+    // maybe change to allow different dice?
     const diceRolls = rollDice([6, 6]);
     const total = diceRolls[0].roll + diceRolls[1].roll;
     
@@ -184,6 +185,7 @@ async function apocalypseWorldDiceRoller() {
     rollResult += `Dice 1: ${diceRolls[0].roll}\n`;
     rollResult += `Dice 2: ${diceRolls[1].roll}\n`;
     rollResult += `Total: ${total}\n\n`;
+    // ADD STAT HERE
 
     if (total >= 10) {
         rollResult += "Success!\n" + selectedMove.success;
@@ -203,6 +205,7 @@ async function apocalypseWorldDiceRoller() {
     }
 
     toastr.info(rollResult);
+    return;
 }
 
 // Helper function to wait for user input
@@ -240,6 +243,7 @@ function parseMoves(response) {
     return `<div class=\"move\">${newMoves.join("")}</div>`
 }
 
+// Wait for Fallout generation
 async function waitForGeneration() {
     try {
         // Wait for group to finish generating
@@ -255,6 +259,7 @@ async function waitForGeneration() {
 }
 /**
  * Handles the DiceMaestro move fallout generation
+ * Totally broken
  * @returns
  */
 async function requestDiceMaestroFallout() {
@@ -286,7 +291,7 @@ async function requestDiceMaestroFallout() {
     const useWIAN = extension_settings.DiceMaestro_responses?.apply_wi_an || defaultSettings.apply_wi_an;
     const responseLength = extension_settings.DiceMaestro_responses?.response_length || defaultSettings.response_length;
     //  generateQuietPrompt(quiet_prompt, quietToLoud, skipWIAN, quietImage = null, quietName = null, responseLength = null, noContext = false)
-    const response = await generateQuietPrompt(prompt, false, !useWIAN, null, "Suggestion List", responseLength);
+    const response = await generateQuietPrompt(prompt, false, !useWIAN, null, "Fallout List", responseLength);
 
     const parsedResponse = parseResponse(response);
     if (!parsedResponse) {
@@ -299,6 +304,7 @@ async function requestDiceMaestroFallout() {
 
 /**
  * Removes the last DiceMaestro message from the chat
+ * should work?
  * @param {getContext.chat} chat
  */
 function removeLastDiceMaestroMessage(chat = getContext().chat) {
@@ -332,6 +338,11 @@ async function sendMessageToUI(parsedResponse) {
     context.addOneMessage(messageObject, { showSwipes: false, forceId: chat.length - 1 });
 }
 
+function beginDiceMaestr() {
+    apocalypseWorldDiceRoller();
+    //some other stuff here
+}
+
 /**
  * Settings Stuff
  */
@@ -342,38 +353,12 @@ function loadSettings() {
     }
     Object.assign(defaultSettings, extension_settings.DiceMaestro_responses);
 
-    $('#DiceMaestro_llm_prompt').val(extension_settings.DiceMaestro_responses.llm_prompt).trigger('input');
-    $('#DiceMaestro_llm_prompt_impersonate').val(extension_settings.DiceMaestro_responses.llm_prompt_impersonate).trigger('input');
-    $('#DiceMaestro_apply_wi_an').prop('checked', extension_settings.DiceMaestro_responses.apply_wi_an).trigger('input');
-    $('#DiceMaestro_num_responses').val(extension_settings.DiceMaestro_responses.num_responses).trigger('input');
-    $('#DiceMaestro_num_stats_value').text(extension_settings.DiceMaestro_responses.num_responses);
     $('#DiceMaestro_response_length').val(extension_settings.DiceMaestro_responses.response_length).trigger('input');
     $('#DiceMaestro_response_length_value').text(extension_settings.DiceMaestro_responses.response_length);
 
 }
 
 function addEventListeners() {
-    $('#DiceMaestro_llm_prompt').on('input', function() {
-        extension_settings.DiceMaestro_responses.llm_prompt = $(this).val();
-        saveSettingsDebounced();
-    });
-
-    $('#DiceMaestro_llm_prompt_impersonate').on('input', function() {
-        extension_settings.DiceMaestro_responses.llm_prompt_impersonate = $(this).val();
-        saveSettingsDebounced();
-    });
-
-    $('#DiceMaestro_apply_wi_an').on('change', function() {
-        extension_settings.DiceMaestro_responses.apply_wi_an = !!$(this).prop('checked');
-        saveSettingsDebounced();
-    });
-    $('#DiceMaestro_num_responses').on('input', function() {
-        const value = $(this).val();
-        extension_settings.DiceMaestro_responses.num_responses = Number(value);
-        $('#DiceMaestro_num_stats_value').text(value);
-        saveSettingsDebounced();
-    });
-
     $('#DiceMaestro_response_length').on('input', function() {
         const value = $(this).val();
         extension_settings.DiceMaestro_responses.response_length = Number(value);
@@ -398,8 +383,8 @@ jQuery(async () => {
         },
         helpString: 'Triggers DiceMaestro Roller Interface.',
         SlashCommandArgument.fromProps({ description: 'action user is taking',
-            typeList: ARGUMENT_TYPE.STRING
-            isRequired: false,
+            typeList: ARGUMENT_TYPE.STRING,
+            isRequired: false
         })
     }));
 

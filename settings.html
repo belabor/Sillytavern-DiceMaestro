@@ -5,28 +5,6 @@
             <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content">
-            <div class="DiceMaestro_settings-extension_block flex-container">
-                <label for="DiceMaestro_llm_prompt">LLM Prompt for Options</label>
-                <small><i id="hint">Use {{statsNumber}} for the Number of Responses.</i></small>
-                <textarea id="DiceMaestro_llm_prompt" class="text_pole textarea_compact" rows="4" placeholder="Enter the system prompt for the LLM to generate DiceMaestro options"></textarea>
-            </div>
-            </br>
-            <div class="DiceMaestro_settings-extension_block flex-container">
-                <label for="DiceMaestro_llm_prompt_impersonate">LLM Prompt for Impersonation</label>
-                <small><i id="hint">Use {{statsNumber}} for the text from the chosen context.</i></small>
-                <textarea id="DiceMaestro_llm_prompt_impersonate" class="text_pole textarea_compact" rows="4" placeholder="Enter the system prompt for the LLM to generate impersonated responses"></textarea>
-            </div>
-            </br>
-            <label class="checkbox_label" for="DiceMaestro_apply_wi_an">
-                <input id="DiceMaestro_apply_wi_an" type="checkbox" />
-                <span>Apply World Info / Author's Note</span>
-            </label>
-            </br>
-            <label for="DiceMaestro_num_responses">Number of Stats: <span id="DiceMaestro_num_stats_value">6</span></label>
-            <div class="range-block">
-                <input id="DiceMaestro_num_responses" type="range" min="1" max="10" step="1" value="6" />
-            </div>
-            </br>
             <label for="DiceMaestro_response_length">API response length: <span id="DiceMaestro_response_length_value">100</span></label>
             <div class="range-block">
                 <input id="DiceMaestro_response_length" type="range" min="1" max="2000" step="25" value="500" />
