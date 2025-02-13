@@ -146,7 +146,7 @@ async function apocalypseWorldDiceRoller() {
     basicMoves.forEach((move, index) => {
             movesChoiceDisplay += `${index + 1}. <div class="move"><button class="move">${move.name}</button><span class="text"> ${move.stat}</span></button></div>`;
         });
-        movesChoiceDisplay += `<div class=\"moves\">${movesChoiceDisplay.join("")}</div>`;
+        movesChoiceDisplay += `<div class=\"moves\">${movesChoiceDisplay}</div>`;
         
     await sendMessageToUI(movesChoiceDisplay);
 
