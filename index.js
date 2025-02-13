@@ -338,7 +338,7 @@ async function sendMessageToUI(parsedResponse) {
     context.addOneMessage(messageObject, { showSwipes: false, forceId: chat.length - 1 });
 }
 
-function beginDiceMaestr() {
+function beginDiceMaestro() {
     apocalypseWorldDiceRoller();
     //some other stuff here
 }
@@ -377,16 +377,17 @@ jQuery(async () => {
     addEventListeners();
     SlashCommandParser.addCommandObject(SlashCommand.fromProps({
         name: 'DiceMaestro',
-        callback: async () => {
-            await beginDiceMaestro();
-            return '';
-        },
         helpString: 'Triggers DiceMaestro Roller Interface.',
-        SlashCommandArgument.fromProps({ description: 'action user is taking',
-            typeList: ARGUMENT_TYPE.STRING,
-            isRequired: false
-        })
-    }));
+        description: `action user is taking`,
+        typeList: ARGUMENT_TYPE.STRING,
+        enumList: [string],
+        isRequired: false,
+        callback: async () => {
+            beginDiceMaestro();
+            return ''
+        }
+    })
+    );
 
     MacrosParser.registerMacro('suggestionNumber', () => `${extension_settings.DiceMaestro_responses?.num_responses || defaultSettings.num_responses}`);
 
