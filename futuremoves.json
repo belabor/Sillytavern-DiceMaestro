@@ -1,0 +1,74 @@
+[
+    {
+        "name": "ACT UNDER PRESSURE",
+        "stat": "cool",
+        "description": "Protagonist acts under serious pressure, requiring unusual discipline, resolve, endurance, or care.",
+        "success": "{{user}} does it, without problem.",
+        "partialsuccess": "<<worse outcome, hard bargain, or ugly choice>>",
+        "fail": "{{user}} fails the action."
+    },
+    {
+        "name": "ASSESS",
+        "stat": "edge",
+        "description": "Protagonist is carefully checking the situation out, studying and analyzing to gather information.",
+        "questions": [
+            "What potential complication do I need to be wary of?",
+            "What do I notice despite an effort to conceal it?",
+            "How is ______ vulnerable to me?",
+            "How can I avoid trouble or hide here?",
+            "What is my best way in/way out/way past?",
+            "Where can I gain the most advantage?",
+            "Who or what is my biggest threat in this situation?",
+            "Who or what is in control here?"
+        ]
+    },
+    {
+        "name": "GO AGGRO",
+        "stat": "edge",
+        "description": "Protagonist uses the threat of violence to control the antagonist’s behavior and intends to carry through.",
+        "success": "Antagonist does what {{user}} wants.",
+        "partialsuccess": [
+            "They attempt to remove you as a threat, but not before suffering the established consequences.",
+            "They do it, but they want payback. Add them as a Threat.",
+            "They do it, but tell someone all about it. Advance the appropriate Mission Clock."
+        ],
+        "fail": "{{user}} fails the action."
+    },
+    {
+        "name": "MIX IT UP",
+        "stat": "meat",
+        "description": "Protagonist uses violence to gain the upper hand or seize control of his objective.",
+        "success": "{{user}} does it, without problem.",
+        "partialsuccess": [
+            "You make too much noise. Advance the relevant Mission Clock.",
+            "You take harm as established by the fiction.",
+            "An ally takes harm as established by the fiction.",
+            "Something of value breaks."
+        ],
+        "fail": "{{user}} fails the action."
+    },
+    {
+        "name": "RESEARCH",
+        "stat": "mind",
+        "description": "Protagonist is investigating his target, with a library, a dossier, or a database.",
+        "success": "Take [intel]; the MC will answer your question and answer a follow-up question from this list as well:",
+        "questions": [
+            "Where would I find ______?",
+            "How secure is ______?",
+            "Who or what is related to ______?",
+            "Who owned or employed ______?",
+            "Who or what is ______ most valuable to?",
+            "What is the relationship between ______ and ______?"
+        ],
+        "partialsuccess": "Take [intel]; the MC will answer your question.",
+        "fail": "The MC will answer your question... and make a move."
+    },
+    {
+        "name": "FAST TALK",
+        "stat": "style",
+        "description": "Protagonist tries to convince someone to do what they want, using bluffs, lies, or bluster.",
+        "success": "NPCs do what {{user}} wants.",
+        "partialsuccess": "NPCs do it, but someone will find out.",
+        "fail": "{{user}} fails to convince them."
+    }
+]

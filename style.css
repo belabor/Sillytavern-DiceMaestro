@@ -1,82 +1,23 @@
-.mes_text .custom-suggestions {
+#maestroMoveButtons {
     display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-    margin: 1em 0.5em;
-    padding: 0.5em;
-    border: 2px solid var(--SmartThemeBorderColor);
+    flex-direction: column; /* Stack items vertically */
 }
 
-.mes_text .custom-suggestions:before {
-    content: "What result are you taking?";
-    font-weight: bold;
-    display: block;
-    text-align: center;
-    font-size: 1em;
-    margin-bottom: 0.5em;
+.move-item {
+    display: flex; /* Arrange button and description horizontally */
+    align-items: center; /* Vertically align button and description */
+    margin-bottom: 5px; /* Add spacing between move items */
 }
 
-.mes_text .custom-suggestions > .custom-suggestion {
-    display: flex;
+.move-item button {
+    margin-right: 10px; /* Space between button and description */
+    width: 120px; /* Set a fixed width for all buttons (adjust as needed) */
+    text-overflow: ellipsis; /* Add an ellipsis (...) to indicate hidden text */
+    /* Add any other button styling here */
 }
 
-.mes_text .custom-suggestions > .custom-suggestion button {
-    color: var(--SmartThemeBodyColor);
-    background-color: var(--black50a);
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 5px;
-    padding: 0.75em;
-    margin: 0.25em 0;
-    font-size: 1em;
-    opacity: 0.5;
-    cursor: pointer;
-    transition: opacity 0.3s;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-
-.mes_text .custom-suggestions > .custom-suggestion button:hover {
-    opacity: 1;
-}
-
-.mes_text .custom-suggestions > .custom-suggestion button.custom-suggestion {
-    flex: 1 1 auto;
-}
-
-.mes_text .custom-suggestions > .custom-suggestion button.custom-edit-suggestion {
-    flex: 0 0 auto;
-}
-
-.mes_text .custom-suggestions > .custom-suggestion button.custom-edit-suggestion .custom-text {
-    display: none;
-}
-
-@media (max-width: 1200px) {
-    .mes_text .custom-suggestions {
-        margin: 0.2em 0;
-        padding: 0.5em;
-        gap: 0.5em;
-    }
-
-    .mes_text .custom-suggestions:before {
-        font-size: 1em;
-        margin-bottom: 0.3em;
-    }
-
-    .mes_text .custom-suggestions > .custom-suggestion {
-        flex-direction: column;
-    }
-
-    .mes_text .custom-suggestions > .custom-suggestion button {
-        font-size: 0.9em;
-        padding: 0.75em;
-        margin: 0.1em 0;
-        width: 100%;
-    }
-
-    .mes_text .custom-suggestions > .custom-suggestion button.custom-edit-suggestion {
-        margin-top: 0.2em;
-    }
+.move-description {
+    flex-grow: 1; /* Allow description to take up remaining space */
+    font-size: 12px; /* Reduce the font size for descriptions too (adjust as needed) */
+    /* Add any styling for the description text here */
 }

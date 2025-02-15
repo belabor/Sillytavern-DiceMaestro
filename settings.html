@@ -1,14 +1,17 @@
-<div id="DiceMaestro_settings">
+<div id="maestro_contents" class="maestro-settings">
     <div class="inline-drawer">
         <div class="inline-drawer-toggle inline-drawer-header">
-            <b>Dice Maestro</b>
+            <div class="flex-container alignitemscenter margin0">
+                <b data-i18n="ext_obj_title">Dice Maestro</b>
+                <i id="maestroExtensionPopoutButton" class="fa-solid fa-window-restore menu_button margin0"></i>
+            </div>
             <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content">
-            <label for="DiceMaestro_response_length">API response length: <span id="DiceMaestro_response_length_value">100</span></label>
-            <div class="range-block">
-                <input id="DiceMaestro_response_length" type="range" min="1" max="2000" step="25" value="500" />
+            <div id="maestroExtensionDrawerContents">
+                <!-- Dynamic stats will be inserted here -->
             </div>
+            <hr class="sysHR">
         </div>
     </div>
 </div>

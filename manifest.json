@@ -3,9 +3,11 @@
     "loading_order": 1,
     "requires": [],
     "optional": [],
-    "js": "index.js",
-    "css": "style.css",
+    "js": "./DiceMaestro.js",
+    "description": "PbtA-style dice roller for Solo Roleplay",
+    "css": "./style.css",
     "author": "belabor",
     "version": "0.1",
+    "tags": ["dice", "rpg", "roleplay"],
     "homePage": "https://github.com/belabor/Sillytavern-DiceMaestro"
 }

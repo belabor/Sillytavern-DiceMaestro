@@ -1,0 +1,34 @@
+[
+    {
+        "name": "ACT UNDER PRESSURE",
+        "stat": "cool",
+        "description": "{{user}} acts under serious pressure, requiring unusual discipline, resolve, endurance, or care.",
+        "success": "{{user}} does it, without problem.",
+        "partialsuccess": "{{user}} is presented with either a worse outcome, a hard bargain, or an ugly choice",
+        "fail": "{{user}} fails the action.  Circumstances dictate the result."
+    },
+    {
+        "name": "GO AGGRO",
+        "stat": "edge",
+        "description": "{{user}} uses the threat of violence to control the antagonist’s behavior and intends to carry through.",
+        "success": "{{user}} convinces them to do what {{user}} wants.",
+        "partialsuccess": "{{user}} convinces them to do what {{user}} wants, but at a price. Examples: They attempt to remove {{user}} as a threat, but not before suffering the established consequences, they do it, but they want payback. or they do it, but word gets out and someone higher up will not be pleased.",
+        "fail": "{{user}} fails the action.  Circumstances dictate the result."
+    },
+    {
+        "name": "MIX IT UP",
+        "stat": "meat",
+        "description": "{{user}} uses violence to gain the upper hand or seize control of his objective.",
+        "success": "{{user}} does it, without problem.",
+        "partialsuccess": "{{user}} makes too much noise, {{user}} takes harm as established by the fiction, An ally takes harm as established by the fiction or something of value that belongs to {{user}} breaks.",
+        "fail": "{{user}} fails the action."
+    },
+    {
+        "name": "FAST TALK",
+        "stat": "style",
+        "description": "{{user}} tries to convince someone to do what they want, using bluffs, lies, or bluster.",
+        "success": "{{user}} convinces them to do what {{user}} wants.",
+        "partialsuccess": "they do it, but someone will find out which will cause appropriate blowback later",
+        "fail": "{{user}} fails to convince them."
+    }
+]
