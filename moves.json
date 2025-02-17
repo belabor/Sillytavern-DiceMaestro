@@ -20,7 +20,7 @@
         "stat": "meat",
         "description": "{{user}} uses violence to gain the upper hand or seize control of his objective.",
         "success": "{{user}} does it, without problem.",
-        "partialsuccess": "{{user}} makes too much noise, {{user}} takes harm as established by the fiction, An ally takes harm as established by the fiction or something of value that belongs to {{user}} breaks.",
+        "partialsuccess": "{{user}} succeeds, but.. They makes too much noise, {{user}} takes harm as established by the fiction, An ally takes harm as established by the fiction or something of value that belongs to {{user}} breaks.",
         "fail": "{{user}} fails the action."
     },
     {

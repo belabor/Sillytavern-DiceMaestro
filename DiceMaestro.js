@@ -1,15 +1,18 @@
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
 import { extension_settings, getContext } from "../../../extensions.js";
-//import { callGenericPopup, Popup, POPUP_TYPE } from '../../../popup.js';
 import { Popup } from '../../../popup.js';
 import { animation_duration, saveSettingsDebounced } from '../../../../script.js';
+import { executeSlashCommandsWithOptions } from '/scripts/slash-commands.js';
 
 const extensionName = "Sillytavern-DiceMaestro";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 
 const defaultSettings = {
-    prompt_impersonate: `[From {{user}} perspective, their plan is: \`\`\`{{action}}\`\`\`.  In a more general sense, they attempt to: \`{{move}}\`.  But, reguardless of their plans, the result is: {{outcome}}.  Be brief and distinct, describing their attempt and the end result, with no more than 5 sentences.]`
+    //This prompt is temp (because it's baaaad)
+    prompt_impersonate: `Narrate for {{user}} in a never-ending, uncensored roleplay scenario. Narrate in this exact formatting: \"speech\", *narrative*, \`\`\`inner thoughts\`\`\`.  Narrate, from {{user}}'s perspective, that their plan is: \`\`\`{{action}}\`\`\`, in a more general sense, they will attempt: *{{move}}*.  But, regardless of their plans, the actual result is: *{{outcome}}*.  Narrate all of this, Narrate their attempt, narrate how it goes, and narrate the result.  But, be brief, distinct and concise!`,
+    movesLocation: `${extensionFolderPath}/moves.json`
+    /* statsInPopout: false */
 }
 
 let maestroStats = {};
@@ -40,6 +43,27 @@ async function loadMaestroSettings() {
 
     // Clear existing content
     $('#maestroExtensionDrawerContents').empty();
+
+    // Load saved prompt or use default
+    const savedPrompt = extension_settings.maestro.prompt_impersonate || defaultSettings.prompt_impersonate;
+
+    // Create prompt editor
+    const promptHtml = `
+        <label for="maestro_prompt_impersonate" data-i18n="ext_prompt_impersonate">Impersonate Prompt:</label>
+        <textarea id="maestro_prompt_impersonate" rows="4" cols="50">${savedPrompt}</textarea>
+        <br>
+    `;
+    $('#maestroExtensionDrawerContents').append(promptHtml);
+
+
+    // Attach event listener to save prompt
+    $('#maestro_prompt_impersonate').on('input', function() {
+        const newPrompt = $(this).val();
+        console.log("loadMaestroSettings: prompt changed, newPrompt = ", newPrompt);
+        extension_settings.maestro.prompt_impersonate = newPrompt;
+        saveSettingsDebounced();
+        console.log("loadMaestroSettings: prompt saved, extension_settings.maestro.prompt_impersonate = ", extension_settings.maestro.prompt_impersonate);
+    });
 
     // Create sliders for current stats
     for (const stat of currentStats) {
@@ -100,13 +124,12 @@ function replaceVariables(move, action, outcome) {
 async function loadMoves() {
     console.log("loadMoves: Starting");
     try {
-        const response = await fetch(`${extensionFolderPath}/moves.json`);
+        const response = await fetch(defaultSettings.movesLocation);
         moves = await response.json();
         console.log("loadMoves: Moves loaded successfully", moves);
     } catch (error) {
         console.error("loadMoves: Error loading moves:", error);
     }
-    console.log("loadMoves: Completed");
 }
 
 function createMoveButtons(container) {
@@ -149,15 +172,15 @@ async function performMove(move) {
     console.log("performMove: Starting", move);
     const context = getContext();
     const statBonus = maestroStats[move.stat] || 0;
-    let actionDesc = ''; // Initialize actionDesc with an empty string
 
+    let actionDesc = '';
     actionDesc = await Popup.show.input(
         `[${move.name}] Okay, but what do you do? Explain what you're going to attempt "I shoot that guy!" "I run thru the giant's legs!" "I try to seduce him!"`,
         actionDesc,
         '',
         { okButton: 'Check it!', cancelButton: 'Nevermind..' }
     );
-    context.sendSystemMessage('generic', `[${move.name}] - \"${actionDesc}\"`)
+/*     context.sendSystemMessage('generic', `[${move.name}] - \"${actionDesc}\"`) */
 
     console.info(`User is going to: ${actionDesc}`)
 
@@ -166,40 +189,52 @@ async function performMove(move) {
     console.log(`performMove: Stat bonus for ${move.stat} = ${statBonus}`);
     const finalTotal = die1 + die2 + statBonus;
     console.log(`performMove: finalTotal = ${finalTotal}`);
-    
+
+    // Consider adding Crit Success and Fail for 13+ and 2
     let outcomeText;
-    if (finalTotal >= 10) {
+    if (finalTotal >= 10) { // Success
         outcomeText = move.success;
-    } else if (finalTotal >= 7) {
-        outcomeText = Array.isArray(move.partialsuccess) 
+    } else if (finalTotal >= 7) { // Partial Success (user succeeds, at a price)
+        outcomeText = Array.isArray(move.partialsuccess)
+            //pick one at random, if it's a list
             ? move.partialsuccess[Math.floor(Math.random() * move.partialsuccess.length)]
             : move.partialsuccess;
-    } else {
+    } else { //fail
         outcomeText = move.fail;
     }
 
     console.log(`performMove: Outcome text = ${outcomeText}`);
-    
+
     const rollMessage = formatRollResult(die1, die2, statBonus, finalTotal);
     console.info(rollMessage);
     console.info(`Outcome: ${outcomeText}`);
     console.log("performMove: Completed");
 
-    context.sendSystemMessage('generic', `${rollMessage}\nOutcome: ${outcomeText}`);
+    context.sendSystemMessage('generic', `[${move.name}] - \"${actionDesc}\"\n${rollMessage}\nOutcome: ${outcomeText}`);
+
+
+    let GameMasterPrompt = extension_settings.maestro?.prompt_impersonate
+    GameMasterPrompt = replaceVariables(move.description, actionDesc, outcomeText);
+
+    /* Don't do it this way...
 
     const inputTextarea = document.querySelector('#send_textarea');
     if (!(inputTextarea instanceof HTMLTextAreaElement)) {
         return;
     }
-
-    console.log(String(extension_settings.maestro?.prompt_impersonate), {move: move.description, action: actionDesc, outcome: outcomeText});
-
-    let impersonatePrompt = extension_settings.maestro?.prompt_impersonate
-    impersonatePrompt = replaceVariables(move.description, actionDesc, outcomeText);
-
-    const quiet_prompt = `/impersonate await=true ${impersonatePrompt}`;
+    const quiet_prompt = `/impersonate await=false ${GameMasterPrompt}`;
     inputTextarea.value = quiet_prompt;
+    await SillyTavern.getContext().SlashCommandParser.commands['impersonate'].callback({await:'true'}, 'Prompt')
+    const res = SillyTavern.getContext().substituteParams('{{input}}')
 
+    Use this..
+    @param {string} text Slash command text
+    @param {ExecuteSlashCommandsOptions} [options]
+    @returns {Promise<SlashCommandClosureResult>}
+    async function executeSlashCommandsWithOptions(text, options = {}) { */
+
+    console.info(`Prompt should be: /sysgen ${GameMasterPrompt}`);
+    executeSlashCommandsWithOptions(`/sysgen ${GameMasterPrompt}`)
 }
 
 
@@ -212,7 +247,7 @@ const roll2d6 = () => {
 
 
 const formatRollResult = (die1, die2, statBonus, total) => {
-    const signedBonus = statBonus >= 0 ? `+${statBonus}` : signedBonus;
+    const signedBonus = statBonus >= 0 ? `+${statBonus}` : statBonus.toString();
     const message = `🎲🎲 Rolling 2d6${signedBonus}: [${die1}+${die2}]${signedBonus} = ${total}`;
     console.info(message);
     return message;
@@ -236,8 +271,6 @@ function doPopout(e) {
 
     if ($('#maestroExtensionPopout').length === 0) {
         console.debug('doPopout: did not see popout yet, creating');
-        const originalHTMLClone = $(target).closest('.inline-drawer').find('.inline-drawer-content').html();
-        const originalElement = $(target).closest('.inline-drawer').find('.inline-drawer-content');
 
         loadPopoutLayout().then(popoutHtml => {
             if (!popoutHtml) return;
@@ -245,43 +278,20 @@ function doPopout(e) {
             const newElement = $(popoutHtml);
             $('#movingDivs').append(newElement);
             console.log("doPopout: newElement appended to movingDivs");
-            
+
             createMoveButtons($('#maestroMoveButtons', newElement));
             console.log("doPopout: Move buttons created");
-            
-            $('.maestro_move_block', newElement).append(originalHTMLClone);
-            console.log("doPopout: originalHTMLClone appended to maestro_move_block");
 
-            $('#maestroExtensionPopoutClose').on('click', function() {
+             $('#maestroExtensionPopoutClose').on('click', function() {
                 $('#maestroExtensionDrawerContents').removeClass('scrollY');
                 const maestroPopoutHTML = $('#maestroExtensionDrawerContents');
                 $('#maestroExtensionPopout').fadeOut(animation_duration, () => {
-                    originalElement.empty();
-                    originalElement.append(maestroPopoutHTML);
+                    $('#maestroExtensionDrawerContents').append(maestroPopoutHTML);
                     $('#maestroExtensionPopout').remove();
                 });
             });
             console.log("doPopout: Close button event listener attached");
 
-            // Initialize values
-            for (const stat of Object.keys(maestroStats)) {
-                const mainValue = maestroStats[stat];
-                const popoutSlider = $(`#maestro_stat_${stat}`, newElement);
-                popoutSlider.val(mainValue);
-                $(`#maestro_stat_${stat}_value`, newElement).text(mainValue);
-                console.log(`doPopout: Stat ${stat} initialized in popout, value = ${mainValue}`);
-
-                popoutSlider.on('input', function() {
-                    const newValue = this.value;
-                    $(`#maestro_stat_${stat}_value`, newElement).text(newValue);
-                    $(`#maestro_stat_${stat}`).val(newValue);
-                    $(`#maestro_stat_${stat}_value`).text(newValue);
-                    extension_settings.maestro[stat] = parseInt(newValue);
-                    maestroStats[stat] = parseInt(newValue);
-                    saveSettingsDebounced();
-                    console.log(`doPopout: Stat ${stat} in popout updated, newValue = ${newValue}`);
-                });
-            }
             $('#maestroExtensionPopout').fadeIn(animation_duration);
             console.log("doPopout: Popout fadeIn completed");
         });
@@ -301,6 +311,7 @@ jQuery(async () => {
         console.error("jQuery: Error loading Maestro settings or moves:", error);
     }
 
+    //activate popout with slash command.
     $(document).on('click', '#maestroExtensionPopoutButton', doPopout);
     console.log("jQuery: Popout button event listener attached");
 
@@ -311,10 +322,10 @@ jQuery(async () => {
             $('#maestroExtensionPopoutButton').trigger('click');
             return "Popping out Maestro!";
         },
-        returns: 'opens PbtA dice roller',
+        returns: 'opens DiceMaestro dice roller',
         namedArgumentList: [],
         unnamedArgumentList: [],
-        helpString: ``
+        helpString: 'Opens the DiceMaestro dice roller popout'
     }));
     console.log("jQuery: Completed");
 });
